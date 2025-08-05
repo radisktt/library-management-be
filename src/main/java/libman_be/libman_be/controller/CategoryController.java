@@ -1,0 +1,42 @@
+package libman_be.libman_be.controller;
+
+import libman_be.libman_be.dto.BaseResponse;
+import libman_be.libman_be.dto.CategoryDTO;
+import libman_be.libman_be.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/categories")
+public class CategoryController {
+    @Autowired
+    private CategoryService categoryService;
+
+    @PostMapping
+    public ResponseEntity<BaseResponse<CategoryDTO>> create(@RequestBody CategoryDTO dto) {
+        return ResponseEntity.ok(categoryService.create(dto));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse<CategoryDTO>> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<BaseResponse<List<CategoryDTO>>> getAll() {
+        return ResponseEntity.ok(categoryService.getAll());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BaseResponse<CategoryDTO>> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+        return ResponseEntity.ok(categoryService.update(id,dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<BaseResponse<String>> delete(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.delete(id));
+    }
+}
