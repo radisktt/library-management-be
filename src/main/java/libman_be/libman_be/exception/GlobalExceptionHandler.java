@@ -18,7 +18,8 @@ public class GlobalExceptionHandler  {
     //Conflict
     @ExceptionHandler({
             UserException.UserAlreadyExistsException.class,
-            CategoryException.CategoryAlreadyExistsException.class
+            CategoryException.CategoryAlreadyExistsException.class,
+            BookException.BookTitleAlreadyExistsException.class,
     })
     public ResponseEntity<BaseResponse<Object>> handleConflict(RuntimeException ex){
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
@@ -26,7 +27,13 @@ public class GlobalExceptionHandler  {
     // 404 Not found
     @ExceptionHandler({
             UserException.UserNotFoundException.class,
-            CategoryException.CategoryNotFoundException.class
+            CategoryException.CategoryNotFoundException.class,
+            BookException.BookNotFoundException.class,
+            BookException.BookNotAvailableException.class,
+            BookException.BookAlreadyBorrowedException.class,
+            PublisherException.PublisherNotFoundException.class,
+            AuthorException.AuthorNotFoundException.class,
+            LibraryException.LibraryNotFoundException.class
     })
     public ResponseEntity<BaseResponse<Object>> handleNotFound(RuntimeException ex){
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());

@@ -23,6 +23,7 @@ public class Book {
     private LocalDate publicationDate;
     private Long pageCount;
     private Long quantity;
+
     @ManyToMany
     @JoinTable(
             name = "book_category",

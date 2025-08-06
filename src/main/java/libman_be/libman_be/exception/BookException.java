@@ -15,4 +15,14 @@ public class BookException extends RuntimeException {
             super(message);
         }
     }
+    public static class BookNotAvailableException extends RuntimeException {
+        public BookNotAvailableException(String message) {
+            super(message);
+        }
+    }
+    public static class BookAlreadyBorrowedException extends RuntimeException {
+        public BookAlreadyBorrowedException(String message) {
+            super(message);
+        }
+    }
 }
