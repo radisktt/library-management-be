@@ -13,8 +13,11 @@ import java.util.List;
 @RequestMapping("/api/publisher")
 public class PublisherController {
 
-    @Autowired
-    private PublisherService publisherService;
+    private final PublisherService publisherService;
+
+    public PublisherController(PublisherService publisherService) {
+        this.publisherService = publisherService;
+    }
 
     @PostMapping
     public ResponseEntity<BaseResponse<PublisherDTO>> create(@RequestBody PublisherDTO dto) {

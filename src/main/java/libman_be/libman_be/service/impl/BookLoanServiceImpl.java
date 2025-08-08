@@ -5,6 +5,7 @@ import libman_be.libman_be.dto.BookLoanDTO;
 import libman_be.libman_be.dto.response.BookLoanResponseDTO;
 import libman_be.libman_be.entity.Book;
 import libman_be.libman_be.entity.BookLoan;
+import libman_be.libman_be.entity.Fine;
 import libman_be.libman_be.entity.User;
 import libman_be.libman_be.exception.BookException;
 import libman_be.libman_be.exception.UserException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 @Service
@@ -94,8 +96,21 @@ public class BookLoanServiceImpl implements BookLoanService {
         if(loan.getStatus() == BookLoan.LoanStatus.RETURNED){
             throw new RuntimeException("Book is returned");
         }
+        LocalDate today = LocalDate.now();
+
+        Long daysOverdue = ChronoUnit.DAYS.between(loan.getDueDate(),today);
+        if(daysOverdue > 0){
+            Fine fine = new Fine();
+            fine.setBookLoan(loan);
+            fine.setAmount(daysOverdue * FINE_PER_DAY);
+            fine.setIssuedDate(today);
+            fine.setPaid(false);
+            fineRepository.save(fine);
+            loan.setFine(fine);
+        }
+
         loan.setStatus(BookLoan.LoanStatus.RETURNED);
-        loan.setReturnDate(LocalDate.now());
+        loan.setReturnDate(today);
 
         Book book = loan.getBook();
         book.setQuantity(book.getQuantity() + 1);
@@ -124,13 +139,56 @@ public class BookLoanServiceImpl implements BookLoanService {
                 .build();
     }
 
+
     @Override
-    public BaseResponse<BookLoanResponseDTO> calculateFine(Long loanId) {
-        return null;
+    @Transactional
+    public BaseResponse<BookLoanResponseDTO> payFine(Long loanId) {
+        BookLoan loan = bookLoanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("BookLoan with ID '" + loanId + "' not found"));
+        Fine fine = loan.getFine();
+        if (fine == null) {
+            throw new RuntimeException("No fine associated with this loan");
+        }
+        if (fine.isPaid()) {
+            throw new RuntimeException("Fine has already been paid");
+        }
+        fine.setPaid(true);
+        fineRepository.save(fine);
+        BookLoanResponseDTO response = bookloanMapper.toBookLoanResponseDTO(loan);
+
+        return BaseResponse.<BookLoanResponseDTO>builder()
+                .status("success")
+                .message("Fine paid successfully")
+                .data(response)
+                .build();
     }
 
     @Override
-    public BaseResponse<BookLoanResponseDTO> payFine(Long loanId) {
-        return null;
+    @Transactional
+    public BaseResponse<BookLoanResponseDTO> extendDueDate(Long loanId, LocalDate dueDate, Long amount) {
+        BookLoan loan = bookLoanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("BookLoan with ID '" + loanId + "' not found"));
+        if (loan.getStatus() == BookLoan.LoanStatus.RETURNED) {
+            throw new RuntimeException("Cannot extend due date for a returned book");
+        }
+        if (loan.getFine() != null && !loan.getFine().isPaid()) {
+            throw new RuntimeException("Cannot extend due date until outstanding fine is paid");
+        }
+        amount = amount == null ? 3 : amount;
+        LocalDate newDueDate = dueDate != null ? dueDate : loan.getDueDate().plusDays(amount);
+        loan.setDueDate(newDueDate);
+        if (loan.getStatus() == BookLoan.LoanStatus.OVERDUE) {
+            loan.setStatus(BookLoan.LoanStatus.BORROWED);
+        }
+        BookLoan updatedLoan = bookLoanRepository.save(loan);
+        BookLoanResponseDTO response = bookloanMapper.toBookLoanResponseDTO(updatedLoan);
+
+        return BaseResponse.<BookLoanResponseDTO>builder()
+                .status("success")
+                .message("Due date extended successfully")
+                .data(response)
+                .build();
     }
+
+
 }

@@ -16,11 +16,14 @@ import java.util.stream.Collectors;
 @Service
 public class AuthorServiceImpl implements AuthorService {
 
-    @Autowired
-    private AuthorRepository authorRepository;
+    private final AuthorRepository authorRepository;
 
-    @Autowired
-    private AuthorMapper authorMapper;
+    private final AuthorMapper authorMapper;
+
+    public AuthorServiceImpl(AuthorRepository authorRepository, AuthorMapper authorMapper) {
+        this.authorRepository = authorRepository;
+        this.authorMapper = authorMapper;
+    }
 
     @Override
     public BaseResponse<AuthorDTO> create(AuthorDTO dto) {

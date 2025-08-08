@@ -13,8 +13,11 @@ import java.util.List;
 @RequestMapping("/api/library")
 public class LibraryController {
 
-    @Autowired
-    private LibraryService libraryService;
+    private final LibraryService libraryService;
+
+    public LibraryController(LibraryService libraryService) {
+        this.libraryService = libraryService;
+    }
 
     @PostMapping
     public ResponseEntity<BaseResponse<LibraryDTO>> create(@RequestBody LibraryDTO dto) {

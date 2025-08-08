@@ -16,11 +16,14 @@ import java.util.stream.Collectors;
 @Service
 public class LibraryServiceImpl implements LibraryService {
 
-    @Autowired
-    private LibraryRepository libraryRepository;
+    private final LibraryRepository libraryRepository;
 
-    @Autowired
-    private LibraryMapper libraryMapper;
+    private final LibraryMapper libraryMapper;
+
+    public LibraryServiceImpl(LibraryRepository libraryRepository, LibraryMapper libraryMapper) {
+        this.libraryRepository = libraryRepository;
+        this.libraryMapper = libraryMapper;
+    }
 
     @Override
     public BaseResponse<LibraryDTO> create(LibraryDTO dto) {

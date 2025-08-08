@@ -23,17 +23,20 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private  UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper,PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserResponseDTO createUser(UserDTO user) {
@@ -76,7 +79,11 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO updateUser(Long id, UserDTO userUpdate) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException.UserNotFoundException("User with id " + id + " not found"));
-
+        if(userUpdate.getEmail() != null && !userUpdate.getEmail().equals(user.getEmail())){
+            if(userRepository.existsByEmail(userUpdate.getEmail())){
+                throw new RuntimeException("Email already exists");
+            }
+        }
         if (userUpdate.getName() != null) {
             user.setName(userUpdate.getName());
         }

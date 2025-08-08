@@ -9,6 +9,8 @@ import libman_be.libman_be.mapper.BookMapper;
 import libman_be.libman_be.repository.*;
 import libman_be.libman_be.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,24 +21,29 @@ import java.util.stream.Collectors;
 @Service
 public class BookServiceImpl implements BookService {
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    private PublisherRepository publisherRepository;
+    private final PublisherRepository publisherRepository;
 
-    @Autowired
-    private AuthorRepository authorRepository;
+    private final AuthorRepository authorRepository;
 
-    @Autowired
-    private LibraryRepository libraryRepository;
+    private final LibraryRepository libraryRepository;
 
-    @Autowired
-    private BookMapper bookMapper;
+    private final BookMapper bookMapper;
 
+    public BookServiceImpl(
+            BookRepository bookRepository, CategoryRepository categoryRepository,
+            PublisherRepository publisherRepository, AuthorRepository authorRepository,
+            LibraryRepository libraryRepository, BookMapper bookMapper) {
+        this.bookRepository = bookRepository;
+        this.categoryRepository = categoryRepository;
+        this.publisherRepository = publisherRepository;
+        this.authorRepository = authorRepository;
+        this.libraryRepository = libraryRepository;
+        this.bookMapper = bookMapper;
+    }
 
     @Override
     @Transactional
@@ -145,15 +152,96 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BaseResponse<List<BookResponseDTO>> getAll() {
-        List<Book> books = bookRepository.findAll();
-        List<BookResponseDTO> bookResponseDTOs = books.stream()
-                .map(bookMapper::toResponseDTO)
-                .collect(Collectors.toList());
-        return BaseResponse.<List<BookResponseDTO>>builder()
+    public BaseResponse<Page<BookResponseDTO>> getAll(Pageable pageable) {
+        Page<Book> books = bookRepository.findAllBook(pageable);
+        Page<BookResponseDTO> bookResponseDTOs = books.map(book -> bookMapper.toResponseDTO(book));
+
+        return BaseResponse.<Page<BookResponseDTO>>builder()
                 .status("success")
                 .message("Books retrieved successfully")
                 .data(bookResponseDTOs)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByAuthorId(Long id, Pageable pageable) {
+        authorRepository.findById(id)
+                .orElseThrow(() -> new AuthorException.AuthorNotFoundException("Author with ID '" + id + "' not found"));
+        Page<Book> books = bookRepository.findByAuthorId(id, pageable);
+        Page<BookResponseDTO> responseDTOS = books.map(book -> bookMapper.toResponseDTO(book));
+
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by author id "+ id +" retrieved successfully")
+                .data(responseDTOS)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByAuthorName(String name, Pageable pageable){
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Author name cannot be empty");
+        }
+        Page<Book> books = bookRepository.findByAuthorName(name, pageable);
+        Page<BookResponseDTO> response = books.map(bookMapper::toResponseDTO);
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by author name retrieved successfully")
+                .data(response)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByCategoryId(Long categoryId, Pageable pageable) {
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryException.CategoryNotFoundException("Category with ID '" + categoryId + "' not found"));
+        Page<Book> books = bookRepository.findByCategoryId(categoryId, pageable);
+        Page<BookResponseDTO> response = books.map(bookMapper::toResponseDTO);
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by category retrieved successfully")
+                .data(response)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByCategoryName(String categoryName, Pageable pageable) {
+        if (categoryName == null || categoryName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be empty");
+        }
+        Page<Book> books = bookRepository.findByCategoryName(categoryName, pageable);
+        Page<BookResponseDTO> response = books.map(bookMapper::toResponseDTO);
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by category name retrieved successfully")
+                .data(response)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByPublisherId(Long publisherId, Pageable pageable) {
+        publisherRepository.findById(publisherId)
+                .orElseThrow(() -> new PublisherException.PublisherNotFoundException("Publisher with ID '" + publisherId + "' not found"));
+        Page<Book> books = bookRepository.findByPublisherId(publisherId, pageable);
+        Page<BookResponseDTO> response = books.map(bookMapper::toResponseDTO);
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by publisher retrieved successfully")
+                .data(response)
+                .build();
+    }
+
+    @Override
+    public BaseResponse<Page<BookResponseDTO>> findByPublisherName(String publisherName, Pageable pageable) {
+        if (publisherName == null || publisherName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Publisher name cannot be empty");
+        }
+        Page<Book> books = bookRepository.findByPublisherName(publisherName, pageable);
+        Page<BookResponseDTO> response = books.map(bookMapper::toResponseDTO);
+        return BaseResponse.<Page<BookResponseDTO>>builder()
+                .status("success")
+                .message("Books by publisher name retrieved successfully")
+                .data(response)
                 .build();
     }
 }

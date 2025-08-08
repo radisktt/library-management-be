@@ -15,11 +15,14 @@ import java.util.stream.Collectors;
 @Service
 public class PublisherServiceImpl implements PublisherService {
 
-    @Autowired
-    private PublisherRepository publisherRepository;
+    private final PublisherRepository publisherRepository;
 
-    @Autowired
-    private PublisherMapper publisherMapper;
+    private final PublisherMapper publisherMapper;
+
+    public PublisherServiceImpl(PublisherRepository publisherRepository, PublisherMapper publisherMapper) {
+        this.publisherRepository = publisherRepository;
+        this.publisherMapper = publisherMapper;
+    }
 
     @Override
     public BaseResponse<PublisherDTO> create(PublisherDTO dto) {
