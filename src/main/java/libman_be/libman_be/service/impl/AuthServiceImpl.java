@@ -7,6 +7,8 @@ import libman_be.libman_be.dto.request.VerificationRequest;
 import libman_be.libman_be.entity.Role;
 import libman_be.libman_be.entity.User;
 import libman_be.libman_be.event.UserRegistrationEvent;
+import libman_be.libman_be.exception.AuthException;
+import libman_be.libman_be.exception.TokenException;
 import libman_be.libman_be.exception.UserException;
 import libman_be.libman_be.repository.RoleRepository;
 import libman_be.libman_be.repository.UserRepository;
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Confirm password does not match");
+            throw new AuthException.InvalidCredentialsException("Confirm password does not match");
         }
 
         User user = new User();
@@ -87,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
     public BaseResponse<String> verifyEmail(String token) {
         String email = redisTemplate.opsForValue().get("verification:" + token);
         if (email == null) {
-            throw new RuntimeException("Invalid or expired verification token");
+            throw new TokenException.InvalidTokenException("Invalid or expired verification token");
         }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException.UserNotFoundException("User with email " + email + " not found"));
@@ -107,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException.UserNotFoundException("User with email " + email + " not found"));
         if(!passwordEncoder.matches(verificationRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid user name or password");
+            throw new AuthException.InvalidCredentialsException("Invalid password");
         }
 
         applicationEventPublisher.publishEvent(new UserRegistrationEvent(this, user));

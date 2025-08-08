@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
             PublisherException.PublisherNotFoundException.class,
             AuthorException.AuthorNotFoundException.class,
             LibraryException.LibraryNotFoundException.class,
+            BookLoanException.BookLoanNotFoundException.class
     })
     public ResponseEntity<BaseResponse<Object>> handleNotFound(RuntimeException ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -56,7 +57,16 @@ public class GlobalExceptionHandler {
 
     // Bad Request (HTTP 400)
     @ExceptionHandler({
-            UserException.EmailUpdateNotAllowedException.class
+            UserException.EmailUpdateNotAllowedException.class,
+            BookLoanException.MaxBooksBorrowedException.class,
+            BookLoanException.OverdueBookException.class,
+            BookLoanException.NoFineException.class,
+            BookLoanException.BookAlreadyReturnedException.class,
+            BookLoanException.FineAlreadyPaidException.class,
+            BookLoanException.FineNotPaidException.class,
+            BookLoanException.InvalidDueDateException.class,
+            AuthException.InvalidCredentialsException.class,
+            IllegalArgumentException.class
     })
     public ResponseEntity<BaseResponse<Object>> handleBadRequest(RuntimeException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());

@@ -5,6 +5,7 @@ import libman_be.libman_be.dto.CategoryDTO;
 import libman_be.libman_be.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<CategoryDTO>> create(@RequestBody CategoryDTO dto) {
         return ResponseEntity.ok(categoryService.create(dto));
     }
@@ -35,11 +37,13 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<CategoryDTO>> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
         return ResponseEntity.ok(categoryService.update(id,dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<String>> delete(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.delete(id));
     }

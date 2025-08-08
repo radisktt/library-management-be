@@ -50,6 +50,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<List<UserResponseDTO>>> getAllUsers() {
         List<UserResponseDTO> userDtos = userService.getAllUsers();
         return ResponseEntity.ok(BaseResponse.<List<UserResponseDTO>>builder()
@@ -65,7 +66,9 @@ public class UserController {
         UserResponseDTO user = userService.updateUser(id,userUpdate);
         return ResponseEntity.ok(user);
     }
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         return userService.deleteUserById(id);
     }

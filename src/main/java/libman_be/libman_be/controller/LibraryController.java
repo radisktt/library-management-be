@@ -5,6 +5,7 @@ import libman_be.libman_be.dto.LibraryDTO;
 import libman_be.libman_be.service.LibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class LibraryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<LibraryDTO>> create(@RequestBody LibraryDTO dto) {
         return ResponseEntity.ok(libraryService.create(dto));
     }
@@ -35,11 +37,13 @@ public class LibraryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<LibraryDTO>> update(@PathVariable Long id, @RequestBody LibraryDTO dto) {
         return ResponseEntity.ok(libraryService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<String>> delete(@PathVariable Long id) {
         return ResponseEntity.ok(libraryService.delete(id));
     }

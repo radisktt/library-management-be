@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,16 +26,19 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<BookDTO>> createBook(@RequestBody BookDTO bookRequest) {
         return ResponseEntity.ok(bookService.create(bookRequest));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<BookResponseDTO>> updateBook(@PathVariable Long id, @RequestBody BookDTO bookRequest) {
         return ResponseEntity.ok(bookService.update(id, bookRequest));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<String>> deleteBook(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.delete(id));
     }

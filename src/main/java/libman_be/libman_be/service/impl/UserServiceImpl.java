@@ -42,7 +42,9 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO createUser(UserDTO user) {
         User addUser = new User();
         if(userRepository.existsByEmail(user.getEmail())){
-            throw new RuntimeException("Email already exists");
+            if (userRepository.existsByEmail(user.getEmail())) {
+                throw new UserException.UserAlreadyExistsException(user.getEmail());
+            }
         }
         addUser.setName(user.getName());
         addUser.setEmail(user.getEmail());
@@ -81,7 +83,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserException.UserNotFoundException("User with id " + id + " not found"));
         if(userUpdate.getEmail() != null && !userUpdate.getEmail().equals(user.getEmail())){
             if(userRepository.existsByEmail(userUpdate.getEmail())){
-                throw new RuntimeException("Email already exists");
+                if (userRepository.existsByEmail(user.getEmail())) {
+                    throw new UserException.UserAlreadyExistsException(user.getEmail());
+                }
             }
         }
         if (userUpdate.getName() != null) {

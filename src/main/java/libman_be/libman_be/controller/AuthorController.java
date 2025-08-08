@@ -5,6 +5,7 @@ import libman_be.libman_be.dto.AuthorDTO;
 import libman_be.libman_be.service.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class AuthorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<AuthorDTO>> create(@RequestBody AuthorDTO dto) {
         return ResponseEntity.ok(authorService.create(dto));
     }
@@ -35,11 +37,13 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<AuthorDTO>> update(@PathVariable Long id, @RequestBody AuthorDTO dto) {
         return ResponseEntity.ok(authorService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<String>> delete(@PathVariable Long id) {
         return ResponseEntity.ok(authorService.delete(id));
     }

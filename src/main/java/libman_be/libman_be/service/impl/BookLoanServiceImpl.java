@@ -8,6 +8,7 @@ import libman_be.libman_be.entity.BookLoan;
 import libman_be.libman_be.entity.Fine;
 import libman_be.libman_be.entity.User;
 import libman_be.libman_be.exception.BookException;
+import libman_be.libman_be.exception.BookLoanException;
 import libman_be.libman_be.exception.UserException;
 import libman_be.libman_be.mapper.BookMapper;
 import libman_be.libman_be.mapper.BookloanMapper;
@@ -144,13 +145,13 @@ public class BookLoanServiceImpl implements BookLoanService {
     @Transactional
     public BaseResponse<BookLoanResponseDTO> payFine(Long loanId) {
         BookLoan loan = bookLoanRepository.findById(loanId)
-                .orElseThrow(() -> new RuntimeException("BookLoan with ID '" + loanId + "' not found"));
+                .orElseThrow(() -> new BookLoanException.BookLoanNotFoundException("BookLoan with ID " + loanId));
         Fine fine = loan.getFine();
         if (fine == null) {
-            throw new RuntimeException("No fine associated with this loan");
+            throw new BookLoanException.NoFineException("No fine associated with this loan");
         }
         if (fine.isPaid()) {
-            throw new RuntimeException("Fine has already been paid");
+            throw new BookLoanException.FineAlreadyPaidException("Fine has already been paid");
         }
         fine.setPaid(true);
         fineRepository.save(fine);
@@ -167,12 +168,12 @@ public class BookLoanServiceImpl implements BookLoanService {
     @Transactional
     public BaseResponse<BookLoanResponseDTO> extendDueDate(Long loanId, LocalDate dueDate, Long amount) {
         BookLoan loan = bookLoanRepository.findById(loanId)
-                .orElseThrow(() -> new RuntimeException("BookLoan with ID '" + loanId + "' not found"));
+                .orElseThrow(() -> new BookLoanException.BookLoanNotFoundException("BookLoan with ID " + loanId));
         if (loan.getStatus() == BookLoan.LoanStatus.RETURNED) {
-            throw new RuntimeException("Cannot extend due date for a returned book");
+            throw new BookLoanException.BookAlreadyReturnedException("Cannot extend due date for a returned book");
         }
         if (loan.getFine() != null && !loan.getFine().isPaid()) {
-            throw new RuntimeException("Cannot extend due date until outstanding fine is paid");
+            throw new BookLoanException.FineNotPaidException("Cannot extend due date until outstanding fine is paid");
         }
         amount = amount == null ? 3 : amount;
         LocalDate newDueDate = dueDate != null ? dueDate : loan.getDueDate().plusDays(amount);

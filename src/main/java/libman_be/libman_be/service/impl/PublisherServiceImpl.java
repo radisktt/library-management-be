@@ -3,6 +3,7 @@ package libman_be.libman_be.service.impl;
 import libman_be.libman_be.dto.BaseResponse;
 import libman_be.libman_be.dto.PublisherDTO;
 import libman_be.libman_be.entity.Publisher;
+import libman_be.libman_be.exception.PublisherException;
 import libman_be.libman_be.mapper.PublisherMapper;
 import libman_be.libman_be.repository.PublisherRepository;
 import libman_be.libman_be.service.PublisherService;
@@ -27,10 +28,9 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public BaseResponse<PublisherDTO> create(PublisherDTO dto) {
         if (publisherRepository.findByName(dto.getName()) != null) {
-            return BaseResponse.<PublisherDTO>builder()
-                    .status("fail")
-                    .message("Publisher with name " + dto.getName() + " already exists")
-                    .build();
+            if (publisherRepository.findByName(dto.getName()) != null) {
+                throw new PublisherException.PublisherAlreadyExistsException("Publisher with name " + dto.getName() + " already exists");
+            }
         }
         Publisher publisher = publisherMapper.toEntity(dto);
         Publisher saved = publisherRepository.save(publisher);
@@ -44,15 +44,11 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public BaseResponse<PublisherDTO> update(Long id, PublisherDTO dto) {
         Publisher publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Publisher with id " + id + " not found"));
+                .orElseThrow(() -> new PublisherException.PublisherNotFoundException("Publisher with id " + id + " not found"));
 
         if (dto.getName() != null && !dto.getName().equals(publisher.getName())) {
-            Publisher existed = publisherRepository.findByName(dto.getName());
-            if (existed != null) {
-                return BaseResponse.<PublisherDTO>builder()
-                        .status("fail")
-                        .message("Publisher with name " + dto.getName() + " already exists")
-                        .build();
+            if (publisherRepository.findByName(dto.getName()) != null) {
+                throw new PublisherException.PublisherAlreadyExistsException("Publisher with name " + dto.getName() + " already exists");
             }
             publisher.setName(dto.getName());
         }
@@ -72,7 +68,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public BaseResponse<String> delete(Long id) {
         Publisher publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Publisher with id " + id + " not found"));
+                .orElseThrow(() -> new PublisherException.PublisherNotFoundException("Publisher with id " + id + " not found"));
         publisherRepository.delete(publisher);
         return BaseResponse.<String>builder()
                 .status("success")
@@ -84,7 +80,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public BaseResponse<PublisherDTO> getById(Long id) {
         Publisher publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Publisher with id " + id + " not found"));
+                .orElseThrow(() -> new PublisherException.PublisherNotFoundException("Publisher with id " + id + " not found"));
         return BaseResponse.<PublisherDTO>builder()
                 .status("success")
                 .message("Publisher retrieved successfully")
