@@ -18,6 +18,7 @@ import libman_be.libman_be.repository.FineRepository;
 import libman_be.libman_be.repository.UserRepository;
 import libman_be.libman_be.service.BookLoanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ import java.util.List;
 @Service
 public class BookLoanServiceImpl implements BookLoanService {
     private static final int DEFAULT_MAX_BORROW_DAYS = 14;
-    private static final double FINE_PER_DAY = 5000.0;
+
+    @Value("${spring.application.fine_per_day}")
+    private double FINE_PER_DAY;
 
     @Autowired
     private BookLoanRepository bookLoanRepository;
