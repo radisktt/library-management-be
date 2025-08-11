@@ -3,6 +3,8 @@ package libman_be.libman_be.controller;
 import libman_be.libman_be.dto.BaseResponse;
 import libman_be.libman_be.dto.BookDTO;
 import libman_be.libman_be.dto.response.BookResponseDTO;
+import libman_be.libman_be.entity.Book;
+import libman_be.libman_be.repository.BookRepository;
 import libman_be.libman_be.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
