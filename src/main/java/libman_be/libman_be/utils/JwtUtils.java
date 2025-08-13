@@ -38,10 +38,11 @@ public class JwtUtils {
     private Key getSignInKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
-    public String generateToken(String email, List<String> roles) {
+    public String generateToken(String email, List<String> roles, Long userId) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("roles", roles)
+                .claim("id",userId)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+expiration))
                 .signWith(getSignInKey(),SignatureAlgorithm.HS256)
@@ -50,6 +51,10 @@ public class JwtUtils {
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
         return claims.get("roles", List.class);
+    }
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("id", Long.class);
     }
     public boolean validateToken(String token, String email) {
         final String usernameFromToken = extractUsername(token);

@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -80,6 +82,11 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<BaseResponse<Object>> handleUnauthorized(TokenException ex) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+    // File Upload Failure (HTTP 500)
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<BaseResponse<Object>> handleIOException(IOException ex) {
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload file: " + ex.getMessage());
     }
 
     // Generic RuntimeException (HTTP 500)

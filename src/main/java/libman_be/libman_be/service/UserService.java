@@ -5,7 +5,9 @@ import libman_be.libman_be.dto.request.RegisterRequest;
 import libman_be.libman_be.dto.response.UserResponseDTO;
 import libman_be.libman_be.entity.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +19,5 @@ public interface UserService {
     ResponseEntity<String> deleteUserById(Long id);
 
 
+    String uploadAvatar(Long id, MultipartFile file) throws IOException;
 }

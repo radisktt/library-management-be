@@ -61,7 +61,7 @@ public class AuthController {
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().toString())
                 .collect(Collectors.toList());
-        String token = jwtUtils.generateToken(user.getEmail(),roles);
+        String token = jwtUtils.generateToken(user.getEmail(),roles, user.getId());
 
         return BaseResponse.<String>builder()
                 .status("sucess")

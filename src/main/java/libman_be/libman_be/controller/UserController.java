@@ -5,15 +5,18 @@ import libman_be.libman_be.dto.UserDTO;
 import libman_be.libman_be.dto.response.UserResponseDTO;
 import libman_be.libman_be.entity.User;
 import libman_be.libman_be.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -73,4 +76,21 @@ public class UserController {
         return userService.deleteUserById(id);
     }
 
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<BaseResponse<String>> uploadAvatar(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            String avatarPath = userService.uploadAvatar(id, file);
+            return ResponseEntity.ok(BaseResponse.<String>builder()
+                    .status("success")
+                    .message("Avatar uploaded successfully")
+                    .data(avatarPath)
+                    .build());
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(BaseResponse.<String>builder()
+                    .status("error")
+                    .message("Failed to upload avatar: " + e.getMessage())
+                    .data(null)
+                    .build());
+        }
+    }
 }
